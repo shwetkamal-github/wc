@@ -1,0 +1,52 @@
+data_pattern = randi([0,1],1,4);
+m = 4;
+n = 2^m - 1;
+x = input('Enter the initial states of LFSR (as a 1x4 array): ');
+if length(x) ~= 4
+    error('Initial state must be a 1x4 array.');
+end
+x1 = x(1);
+x2 = x(2);
+x3 = x(3);
+x4 = x(4);
+states = [];
+pn_sequence = [];
+for i = 1:n
+    states = [states; x1 x2 x3 x4];
+    pn_sequence = [pn_sequence x4];
+    new_x1 = xor(x3, x4);
+    x4 = x3;
+    x3 = x2;
+    x2 = x1;
+    x1 = new_x1;
+end
+figure(1)
+stem(data_pattern);
+axis([-1 4 -2 2])
+title('Original Bit Sequence');
+figure(2);
+stem(pn_sequence);
+axis([-1 15 -2 2])
+title('Pseudorandom Bit Sequence');
+new_pattern = repmat(data_pattern, n, 1);
+dsss_bitsequence = xor(new_pattern', pn_sequence);
+dsss_bitsequence = reshape(dsss_bitsequence', 1, []);
+figure(3);
+stem(dsss_bitsequence);
+title('DSSS Bit Sequence');
+dsss_sig = [];
+t = linspace(0, 2*pi, 256);
+c1 = cos(t);
+c2 = cos(t + pi);
+for k = 1:length(dsss_bitsequence)
+    if dsss_bitsequence(k) == 0
+        sig = c1;
+    else
+        sig = c2;
+    end
+    dsss_sig = [dsss_sig sig];
+end
+figure(4);
+plot(1:length(dsss_sig), dsss_sig)
+axis([-1 length(dsss_sig) -2 2])
+title('DSSS Signal');
